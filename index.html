@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gran San Juan 2026</title>
+    <style>
+        /* Estilos Generales y Fondo Nocturno */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: #08040d;
+            color: #ffffff;
+            scroll-behavior: smooth;
+        }
+
+        /* Canvas de fondo con el pirirí de la fogata */
+        canvas#canvasAmbiente {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Contenedor de la interfaz */
+        .contenido {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, rgba(8, 4, 13, 0.3) 0%, rgba(8, 4, 13, 0.95) 100%);
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            color: #ff9100;
+            text-shadow: 0 0 15px rgba(255, 115, 0, 0.7);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #ffca28;
+            margin-bottom: 2rem;
+        }
+
+        /* Cuenta Regresiva */
+        .cuenta-regresiva {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 145, 0, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .tiempo-bloque {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+        }
+
+        .tiempo-numero {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .tiempo-etiqueta {
+            font-size: 0.8rem;
+            color: #b0bec5;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
+        }
+
+        /* SECCIÓN DEL FORMULARIO INCRUSTADO */
+        .formulario-contenedor {
+            width: 100%;
+            max-width: 640px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 145, 0, 0.2);
+            margin-bottom: 3rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .formulario-contenedor h2 {
+            color: #ffca28;
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .formulario-contenedor p {
+            color: #b0bec5;
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .formulario-san-juan {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .campo-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            text-align: left;
+        }
+
+        .campo-form label {
+            color: #ffca28;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .campo-form input,
+        .campo-form select,
+        .campo-form textarea {
+            width: 100%;
+            border: 1px solid rgba(255, 145, 0, 0.35);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.92);
+            color: #1d122b;
+            font-size: 1rem;
+            outline: none;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .campo-form input:focus,
+        .campo-form select:focus,
+        .campo-form textarea:focus {
+            border-color: #ff9100;
+            box-shadow: 0 0 0 3px rgba(255, 145, 0, 0.25);
+        }
+
+        .btn-enviar {
+            cursor: pointer;
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.05rem;
+            font-weight: bold;
+            border-radius: 50px;
+            background-color: #ff7600;
+            box-shadow: 0 4px 15px rgba(255, 118, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-enviar:hover {
+            background-color: #ff9100;
+            transform: translateY(-2px);
+        }
+
+
+
+        .opciones-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 145, 0, 0.25);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .opcion-linea {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .opcion-linea input[type="checkbox"],
+        .opcion-linea input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #ff7600;
+        }
+
+        .opcion-linea input[type="text"] {
+            flex: 1;
+            min-width: 120px;
+            border: none;
+            border-bottom: 1px solid rgba(255, 202, 40, 0.65);
+            border-radius: 0;
+            padding: 0.35rem 0.5rem;
+            background: transparent;
+            color: #ffffff;
+        }
+
+
+
+        /* Selector tipo botón: no parece formulario de Google */
+        .selector-evento {
+            position: relative;
+            width: 100%;
+        }
+
+        .selector-btn {
+            width: 100%;
+            cursor: pointer;
+            border: 1px solid rgba(255, 145, 0, 0.35);
+            border-radius: 14px;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(255, 118, 0, 0.20), rgba(255, 202, 40, 0.08));
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+        }
+
+        .selector-btn:hover {
+            border-color: #ff9100;
+            background: linear-gradient(135deg, rgba(255, 118, 0, 0.32), rgba(255, 202, 40, 0.12));
+        }
+
+        .selector-flecha {
+            transition: transform 0.25s ease;
+            color: #ffca28;
+        }
+
+        .selector-evento.abierto .selector-flecha {
+            transform: rotate(180deg);
+        }
+
+        .selector-lista {
+            display: none;
+            margin-top: 0.75rem;
+            background: rgba(18, 10, 28, 0.96);
+            border: 1px solid rgba(255, 145, 0, 0.30);
+            border-radius: 14px;
+            padding: 0.85rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+        }
+
+        .selector-evento.abierto .selector-lista {
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .opcion-chip {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #ffffff;
+            font-size: 1rem;
+            padding: 0.85rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .opcion-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 202, 40, 0.45);
+            background: rgba(255, 118, 0, 0.14);
+        }
+
+        .opcion-chip input[type="checkbox"],
+        .opcion-chip input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #ff7600;
+        }
+
+        .opcion-chip input[type="text"] {
+            flex: 1;
+            min-width: 110px;
+            border: none;
+            border-bottom: 1px solid rgba(255, 202, 40, 0.65);
+            border-radius: 0;
+            padding: 0.35rem 0.5rem;
+            background: transparent;
+            color: #ffffff;
+        }
+
+        .selector-resumen {
+            display: block;
+            margin-top: 0.5rem;
+            color: #ffca28;
+            font-size: 0.9rem;
+            min-height: 1.2rem;
+        }
+
+        .confirmacion-linea {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            color: #ffffff;
+            font-weight: 600;
+            background: rgba(255, 118, 0, 0.12);
+            border: 1px solid rgba(255, 118, 0, 0.35);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        .confirmacion-linea input {
+            width: 20px;
+            height: 20px;
+            margin-top: 0.1rem;
+            accent-color: #ff7600;
+        }
+
+        .mensaje-formulario {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.9rem;
+            border-radius: 10px;
+            color: #1b1b1b;
+            background: #ffca28;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .respuestas-contenedor {
+            display: none;
+            margin-top: 1.2rem;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(255, 202, 40, 0.25);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .respuestas-contenedor h3 {
+            color: #ffca28;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .lista-respuestas {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .aviso-confirmados {
+            color: #b0bec5;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .lista-respuestas li {
+            background: linear-gradient(135deg, rgba(255, 118, 0, 0.13), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 202, 40, 0.22);
+            border-radius: 12px;
+            padding: 0.9rem;
+            color: #ffffff;
+            line-height: 1.5;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+        }
+
+        .confirmado-nombre {
+            color: #ffca28;
+            font-size: 1.05rem;
+            margin-bottom: 0.45rem;
+            display: block;
+        }
+
+        .confirmado-dato {
+            display: block;
+            margin: 0.18rem 0;
+        }
+
+        .confirmado-dato b {
+            color: #ffca28;
+        }
+
+
+        .acciones-confirmado {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-editar,
+        .btn-eliminar,
+        .btn-borrar-todo {
+            border: none;
+            color: white;
+            padding: 0.65rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .btn-editar:hover,
+        .btn-eliminar:hover,
+        .btn-borrar-todo:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        .btn-editar { background: #1976d2; }
+        .btn-eliminar { background: #d32f2f; }
+
+        .btn-borrar-todo {
+            width: 100%;
+            margin-bottom: 1rem;
+            background: #b71c1c;
+        }
+
+        /* Botón de Drive */
+        .btn-drive {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 4rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            background-color: #ff7600;
+            box-shadow: 0 4px 15px rgba(255, 118, 0, 0.3);
+        }
+
+        .btn-drive:hover {
+            background-color: #ff9100;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 145, 0, 0.5);
+        }
+
+        /* SECCIÓN NUEVA: GALERÍA INTEGRADA DE RECUERDOS 2025 */
+        .recuerdos-seccion {
+            width: 100%;
+            max-width: 640px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 202, 40, 0.4);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 4rem;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .recuerdos-seccion h3 {
+            color: #ffca28;
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .recuerdos-seccion p {
+            color: #b0bec5;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Contenedor del Carrusel */
+        .carrusel-contenedor {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            background-color: #000;
+        }
+
+        .carrusel-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            animation: desvanecer 0.5s ease-in-out;
+        }
+
+        .carrusel-slide img, .carrusel-slide video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Evita que las imágenes se deformen */
+        }
+
+        @keyframes desvanecer {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
+
+        /* Botones de navegación (Atrás/Adelante) */
+        .carrusel-btn {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 145, 0, 0.8);
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s, transform 0.1s;
+            z-index: 10;
+            user-select: none;
+        }
+
+        .carrusel-btn:hover { background: #ff9100; }
+        .carrusel-btn:active { transform: translateY(-50%) scale(0.9); }
+        .prev { left: 15px; }
+        .next { right: 15px; }
+
+        /* SECCIÓN DE JUEGOS */
+        .juegos-seccion {
+            width: 100%;
+            max-width: 950px;
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+
+        .juegos-seccion h2 {
+            color: #ff9100;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 115, 0, 0.5);
+        }
+
+        .juegos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .juego-tarjeta {
+            background: rgba(18, 10, 28, 0.85);
+            border: 2px solid rgba(255, 145, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem 1rem;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .juego-tarjeta:hover {
+            transform: translateY(-5px);
+            border-color: #ff7600;
+            background: rgba(28, 16, 43, 0.9);
+            box-shadow: 0 6px 25px rgba(255, 118, 0, 0.2);
+        }
+
+        .pixel-canvas-container {
+            width: 100px;
+            height: 100px;
+            background-color: #12091c;
+            border: 2px dashed rgba(255, 145, 0, 0.15);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            overflow: hidden;
+        }
+
+        .pixel-canvas-container canvas {
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+
+        .juego-tarjeta h3 {
+            color: #ffca28;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .juego-descripcion {
+            color: #d1c4e9;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            text-align: center;
+            padding: 0 0.5rem;
+        }
+
+        /* Sección del Mapa */
+        .mapa-contenedor {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .mapa-contenedor h3 {
+            color: #ffca28;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .mapa-box {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .mapa-box iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 2rem; }
+            .cuenta-regresiva { gap: 0.5rem; padding: 1rem; }
+            .tiempo-numero { font-size: 1.8rem; }
+            .tiempo-bloque { min-width: 55px; }
+            .carrusel-contenedor { height: 280px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvasAmbiente"></canvas>
+
+    <div class="contenido">
+        <header>
+            <h1>¡San Juan Dice Que Sí!</h1>
+            <p>Sábado 27 de Junio de 2026</p>
+        </header>
+
+        <div class="cuenta-regresiva">
+            <div class="tiempo-bloque"><span class="tiempo-numero" id="dias">00</span><span class="tiempo-etiqueta">Días</span></div>
+            <div class="tiempo-bloque"><span class="tiempo-numero" id="horas">00</span><span class="tiempo-etiqueta">Horas</span></div>
+            <div class="tiempo-bloque"><span class="tiempo-numero" id="minutos">00</span><span class="tiempo-etiqueta">Min</span></div>
+            <div class="tiempo-bloque"><span class="tiempo-numero" id="segundos">00</span><span class="tiempo-etiqueta">Seg</span></div>
+        </div>
+
+        <div class="formulario-contenedor">
+            <h2>📝 Confirmación y Karu</h2>
+            <p>Anotate acá con tu nombre, cuántas personas vienen y qué vas a traer para colaborar.</p>
+            
+            <form id="formSanJuan" class="formulario-san-juan">
+                <div class="campo-form">
+                    <label for="nombre">Nombre y apellido *</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ej: Juan Pérez" required>
+                </div>
+
+                <div class="campo-form">
+                    <label for="telefono">Teléfono o WhatsApp</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: 0981 123 456">
+                </div>
+
+                <div class="campo-form">
+                    <label for="personas">Cantidad de personas *</label>
+                    <input type="number" id="personas" name="personas" min="1" value="1" required>
+                </div>
+
+                <div class="campo-form">
+                    <label>¿Qué vas a traer? *</label>
+                    <div class="selector-evento" id="selectorAporte">
+                        <button type="button" class="selector-btn" onclick="alternarSelector('selectorAporte')">
+                            <span>🍽️ Tocar para elegir comida</span>
+                            <span class="selector-flecha">▼</span>
+                        </button>
+                        <div class="selector-lista">
+                            <label class="opcion-chip"><input type="checkbox" name="aporte" value="Empanada de mandioca"> Empanada de mandioca</label>
+                            <label class="opcion-chip"><input type="checkbox" name="aporte" value="Pajagua"> Pajagua</label>
+                            <label class="opcion-chip"><input type="checkbox" name="aporte" value="Mbeju"> Mbeju</label>
+                            <label class="opcion-chip"><input type="checkbox" name="aporte" value="Butifarra"> Butifarra</label>
+                            <label class="opcion-chip"><input type="checkbox" id="aporteOtroCheck" name="aporte" value="Otro"> Otro: <input type="text" id="aporteOtro" placeholder="Especificar"></label>
+                        </div>
+                        <small id="resumenAporte" class="selector-resumen">Todavía no elegiste comida.</small>
+                    </div>
+                </div>
+
+                <div class="campo-form">
+                    <label>¿Qué tomás? *</label>
+                    <div class="selector-evento" id="selectorBebida">
+                        <button type="button" class="selector-btn" onclick="alternarSelector('selectorBebida')">
+                            <span>🥤 Tocar para elegir bebida</span>
+                            <span class="selector-flecha">▼</span>
+                        </button>
+                        <div class="selector-lista">
+                            <label class="opcion-chip"><input type="radio" name="bebida" value="Ron" required> Ron</label>
+                            <label class="opcion-chip"><input type="radio" name="bebida" value="Fernet"> Fernet</label>
+                            <label class="opcion-chip"><input type="radio" name="bebida" value="Cerveza"> Cerveza</label>
+                            <label class="opcion-chip"><input type="radio" id="bebidaOtroRadio" name="bebida" value="Otro"> Otro: <input type="text" id="bebidaOtro" placeholder="Especificar"></label>
+                        </div>
+                        <small id="resumenBebida" class="selector-resumen">Todavía no elegiste bebida.</small>
+                    </div>
+                </div>
+
+                <label class="confirmacion-linea">
+                    <input type="checkbox" id="confirmoAsistencia" required>
+                    Confirmo mi asistencia al San Juan 2026 *
+                </label>
+
+                <div class="campo-form">
+                    <label for="detalle">Observaciones</label>
+                    <textarea id="detalle" name="detalle" rows="3" placeholder="Ej: voy un poco tarde, llevo carbón, voy con mi familia..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-enviar">🔥 Confirmar asistencia</button>
+            </form>
+
+            <div id="mensajeFormulario" class="mensaje-formulario"></div>
+
+            <div id="respuestasContenedor" class="respuestas-contenedor">
+                <h3>✅ Personas que ya confirmaron asistencia</h3>
+                <p class="aviso-confirmados">Acá se muestran las respuestas guardadas desde esta página.</p>
+                <button type="button" class="btn-borrar-todo" onclick="borrarTodasLasConfirmaciones()">🗑️ Borrar todas las confirmaciones</button>
+                <ul id="listaRespuestas" class="lista-respuestas"></ul>
+            </div>
+        </div>
+        
+        <a href="https://drive.google.com/drive/folders/1o05tDmwOnGvvMyki03suP1WQEjvzXr6G?usp=drive_link" target="_blank" class="btn-drive">
+            📸 Subí tus fotos del 2026 acá
+        </a>
+
+       
+<div class="recuerdos-seccion">
+    <h3>🎞️ Reviví el San Juan 2025</h3>
+    <p>Mirá los mejores momentos directos desde acá. ¡Se viene la versión 2026!</p>
+
+    <div class="carrusel-contenedor">
+        <button class="carrusel-btn prev" onclick="cambiarSlide(-1)">&#10094;</button>
+        <button class="carrusel-btn next" onclick="cambiarSlide(1)">&#10095;</button>
+
+        <div class="carrusel-slide">
+            <img src="imagen1.jpeg.jpeg" alt="San Juan 2025 - Momento 1">
+        </div>
+
+        <div class="carrusel-slide">
+            <img src="imagen2.jpeg.jpeg" alt="San Juan 2025 - Momento 2">
+        </div>
+
+        <div class="carrusel-slide">
+            <img src="imagen3.jpeg.jpeg" alt="San Juan 2025 - Momento 3">
+        </div>
+
+        <div class="carrusel-slide">
+            <img src="1.jpeg" alt="San Juan 2025 - Momento 4">
+        </div>
+
+        <div class="carrusel-slide">
+            <img src="2.jpeg" alt="San Juan 2025 - Momento 5">
+        </div>
+
+        <div class="carrusel-slide">
+            <img src="3.jpeg" alt="San Juan 2025 - Momento 6">
+        </div>
+
+        <div class="carrusel-slide">
+            <img src="4.jpeg" alt="San Juan 2025 - Momento 7">
+        </div>
+
+        <div class="carrusel-slide">
+            <img src="5.jpeg" alt="San Juan 2025 - Momento 8">
+        </div>
+
+        <!-- Video 1 -->
+        <div class="carrusel-slide">
+            <video src="5.mp4" muted loop playsinline controls></video>
+        </div>
+
+        <!-- Video 2 -->
+        <div class="carrusel-slide">
+            <video src="video1.mp4.mp4" muted loop playsinline controls></video>
+        </div>
+    </div>
+</div>
+
+        <div class="juegos-seccion">
+            <h2>🔥 Juegos Tradicionales 🔥</h2>
+            <div class="juegos-grid">
+                
+                <div class="juego-tarjeta">
+                    <div class="pixel-canvas-container"><canvas id="pxToro" width="32" height="32"></canvas></div>
+                    <h3>Toro Kandil</h3>
+                    <p class="juego-descripcion">¡Atajate! El famoso toro de armazón de madera con cuernos en llamas sale a correr y armar guyryry entre la multitud.</p>
+                </div>
+
+                <div class="juego-tarjeta">
+                    <div class="pixel-canvas-container"><canvas id="pxJudas" width="32" height="32"></canvas></div>
+                    <h3>Judas Kái</h3>
+                    <p class="juego-descripcion">El muñeco de trapo relleno de bombas arde en el fuego. ¡Llegó la hora de la explosión y el festejo!</p>
+                </div>
+
+                <div class="juego-tarjeta">
+                    <div class="pixel-canvas-container"><canvas id="pxKambuchi" width="32" height="32"></canvas></div>
+                    <h3>Kambuchi Jejoka</h3>
+                    <p class="juego-descripcion">Con los ojos vendados y un palo en la mano, tenés que romper el cántaro de barro lleno de sorpresas y premios.</p>
+                </div>
+
+                <div class="juego-tarjeta">
+                    <div class="pixel-canvas-container"><canvas id="pxVosa" width="32" height="32"></canvas></div>
+                    <h3>Carrera Vosá</h3>
+                    <p class="juego-descripcion">Metete en la bolsa de arpillera y demostrá tu agilidad saltando a toda velocidad hasta la meta sin caerte.</p>
+                </div>
+
+                <div class="juego-tarjeta">
+                    <div class="pixel-canvas-container"><canvas id="pxSapukai" width="32" height="32"></canvas></div>
+                    <h3>Competencia de Sapukai</h3>
+                    <p class="juego-descripcion">Prepará la garganta para lanzar el grito más fuerte, largo y con el verdadero sentimiento de nuestra tierra.</p>
+                </div>
+
+                <div class="juego-tarjeta">
+                    <div class="pixel-canvas-container"><canvas id="pxPolca" width="32" height="32"></canvas></div>
+                    <h3>Competencia de Polca</h3>
+                    <p class="juego-descripcion">Sacá a relucir tus mejores pasos de baile. Una competencia para mover el esqueleto al ritmo de nuestra polca paraguaya.</p>
+                </div>
+
+                <div class="juego-tarjeta">
+                    <div class="pixel-canvas-container"><canvas id="pxSorpresa" width="32" height="32"></canvas></div>
+                    <h3>Juego Sorpresa</h3>
+                    <p class="juego-descripcion">Algo inesperado se está cocinando para la noche... ¿Te animás a descubrir qué juego misterioso te espera?</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="mapa-contenedor">
+            <h3>¿Cómo llegar?</h3>
+            <div class="mapa-box">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d450.51958192731854!2d-57.52215063428154!3d-25.39956628609055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2spy!4v1779231732545!5m2!1ses!2spy" 
+                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+      <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    // --- 1. LÓGICA DEL CANVAS GENERAL: EFECTO PIRIRÍ (FUEGO LEVE) ---
+    const canvasBg = document.getElementById('canvasAmbiente');
+    const ctxBg = canvasBg.getContext('2d');
+    function ajustarBg() { canvasBg.width = window.innerWidth; canvasBg.height = window.innerHeight; }
+    window.addEventListener('resize', ajustarBg); ajustarBg();
+
+    class ChispaPiriri {
+        constructor() { this.reset(); this.y = Math.random() * canvasBg.height; }
+        reset() {
+            this.x = Math.random() * canvasBg.width;
+            this.y = canvasBg.height + 10;
+            this.size = Math.random() * 2 + 1;
+            this.speedY = Math.random() * 1.8 + 0.8;
+            this.alpha = Math.random() * 0.4 + 0.2;
+            this.frecuenciaPiriri = Math.random() * 0.2 + 0.1;
+        }
+        actualizar() {
+            this.y -= this.speedY;
+            this.x += Math.sin(this.y * this.frecuenciaPiriri) * 0.8; 
+            this.alpha -= 0.002;
+            if (this.y < 0 || this.alpha <= 0) this.reset();
+        }
+        dibujar() {
+            if (Math.random() > 0.15) { 
+                ctxBg.fillStyle = `rgba(255, ${100 + Math.random() * 60}, 0, ${this.alpha})`;
+                ctxBg.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+    }
+    const chispasBg = Array.from({ length: 65 }, () => new ChispaPiriri());
+
+    function bucleGral() {
+        ctxBg.clearRect(0, 0, canvasBg.width, canvasBg.height);
+        chispasBg.forEach(c => { c.actualizar(); c.dibujar(); });
+        requestAnimationFrame(bucleGral);
+    }
+
+    // --- 2. MICRO-ANIMACIONES PIXEL ART (32x32 píxeles) ---
+    const tick = { frame: 0 };
+
+    function initPixelArt() {
+        const pxToroEl = document.getElementById('pxToro');
+        if (!pxToroEl) return;
+        const pToro = pxToroEl.getContext('2d');
+        const pJudas = document.getElementById('pxJudas').getContext('2d');
+        const pKambuchi = document.getElementById('pxKambuchi').getContext('2d');
+        const pVosa = document.getElementById('pxVosa').getContext('2d');
+        const pSapukai = document.getElementById('pxSapukai').getContext('2d');
+        const pPolca = document.getElementById('pxPolca').getContext('2d');
+        const pSorpresa = document.getElementById('pxSorpresa').getContext('2d');
+
+        function render() {
+            tick.frame++;
+            let f = Math.floor(tick.frame / 8) % 4;
+
+            // Toro Kandil
+            pToro.clearRect(0,0,32,32);
+            pToro.fillStyle = '#ff3d00';
+            if(f%2===0) pToro.fillRect(22, 6, 4, 4); else pToro.fillRect(24, 4, 4, 4);
+            pToro.fillStyle = '#1d122b';
+            pToro.fillRect(6, 12, 16, 10); pToro.fillRect(20, 8, 6, 6);
+            pToro.fillStyle = '#0f0817';
+            if(f===0 || f===2) { pToro.fillRect(8, 22, 2, 4); pToro.fillRect(18, 22, 2, 4); }
+            else { pToro.fillRect(10, 22, 2, 4); pToro.fillRect(16, 22, 2, 4); }
+
+            // Judas Kái
+            pJudas.clearRect(0,0,32,32);
+            pJudas.fillStyle = '#8d6e63'; pJudas.fillRect(12, 12, 8, 12);
+            pJudas.fillStyle = '#ffcc00'; pJudas.fillRect(13, 6, 6, 6);
+            pJudas.fillStyle = f%2===0 ? '#ff9100' : '#ff3d00';
+            pJudas.fillRect(6 + (f*2), 8 + f, 2, 2); pJudas.fillRect(24 - (f*2), 16 - f, 2, 2);
+
+            // Kambuchi
+            pKambuchi.clearRect(0,0,32,32);
+            pKambuchi.fillStyle = '#d84315';
+            if (f < 2) { pKambuchi.fillRect(10, 14, 12, 12); pKambuchi.fillRect(12, 10, 8, 4); }
+            else { pKambuchi.fillRect(6, 18, 5, 6); pKambuchi.fillRect(20, 15, 6, 5); }
+            pKambuchi.fillStyle = '#ffb300';
+            pKambuchi.fillRect(15, f < 2 ? 2 + f*3 : 12, 3, 8);
+
+            // Carrera Vosá
+            pVosa.clearRect(0,0,32,32);
+            let vosaY = (f === 1 || f === 3) ? 10 : 14;
+            pVosa.fillStyle = '#ffe082'; pVosa.fillRect(14, vosaY - 5, 4, 4);
+            pVosa.fillStyle = '#a1887f'; pVosa.fillRect(10, vosaY, 12, 12);
+
+            // Sapukai
+            pSapukai.clearRect(0,0,32,32);
+            pSapukai.fillStyle = '#ffca28'; pSapukai.fillRect(12, 12, 8, 8);
+            pSapukai.fillStyle = '#0b0612'; pSapukai.fillRect(15, 15, 4, 3);
+            pSapukai.strokeStyle = '#ff9100'; pSapukai.lineWidth = 1;
+            pSapukai.beginPath(); pSapukai.arc(16, 16, 4 + (f * 3), 0, Math.PI * 2); pSapukai.stroke();
+
+            // Polca
+            pPolca.clearRect(0,0,32,32);
+            pPolca.fillStyle = '#ff7600';
+            let notaY = 10 + Math.sin(tick.frame / 4) * 4;
+            pPolca.fillRect(14, notaY, 4, 4); pPolca.fillRect(14, notaY - 4, 5, 2);
+            pPolca.fillStyle = '#00e676'; pPolca.fillRect(8 + (f%2), 16, 6, 10);
+            pPolca.fillStyle = '#29b6f6'; pPolca.fillRect(16 - (f%2), 14, 6, 12);
+
+            // Sorpresa
+            pSorpresa.clearRect(0,0,32,32);
+            pSorpresa.fillStyle = '#ba68c8'; pSorpresa.fillRect(8, 10, 16, 16);
+            pSorpresa.strokeRect(8, 10, 16, 16);
+            pSorpresa.fillStyle = '#ffffff'; pSorpresa.fillRect(14, 13, 4, 2); pSorpresa.fillRect(16, 15, 2, 4);
+
+            requestAnimationFrame(render);
+        }
+        render();
+    }
+
+    // --- 3. LÓGICA DEL CARRUSEL DE RECUERDOS ---
+    let slideIndex = 1;
+    let temporizadorCarrusel;
+
+    function mostrarSlides(n) {
+        let i;
+        let slides = document.getElementsByClassName("carrusel-slide");
+        if (slides.length === 0) return;
+        if (n > slides.length) { slideIndex = 1 }
+        if (n < 1) { slideIndex = slides.length }
+        for (i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        if(slides[slideIndex - 1]) {
+            slides[slideIndex - 1].style.display = "block";
+        }
+    }
+
+    function cambiarSlide(n) {
+        clearInterval(temporizadorCarrusel);
+        mostrarSlides(slideIndex += n);
+        iniciarAutoplay();
+    }
+
+    // Vinculamos las funciones a "window" de forma explícita para asegurar compatibilidad en eventos HTML
+    window.cambiarSlide = cambiarSlide;
+
+    function iniciarAutoplay() {
+        temporizadorCarrusel = setInterval(() => {
+            mostrarSlides(slideIndex += 1);
+        }, 4000);
+    }
+
+    // --- 4. RELOJ DE CUENTA REGRESIVA ---
+    const fechaDestino = new Date('June 27, 2026 00:00:00').getTime();
+    function actualizarCuentaRegresiva() {
+        const ahora = new Date().getTime();
+        const diferencia = fechaDestino - ahora;
+
+        if (diferencia <= 0) {
+            const contenedorReloj = document.querySelector('.cuenta-regresiva');
+            if (contenedorReloj) contenedorReloj.innerHTML = "<h2 style='color: #ff9100; text-align: center; width: 100%;'>¡Llegó el día del San Juan! 🔥</h2>";
+            return;
+        }
+        const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+        const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+        const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+        const dEl = document.getElementById('dias');
+        const hEl = document.getElementById('horas');
+        const mEl = document.getElementById('minutos');
+        const sEl = document.getElementById('segundos');
+
+        if (dEl) dEl.innerText = dias.toString().padStart(2, '0');
+        if (hEl) hEl.innerText = horas.toString().padStart(2, '0');
+        if (mEl) mEl.innerText = minutos.toString().padStart(2, '0');
+        if (sEl) sEl.innerText = segundos.toString().padStart(2, '0');
+    }
+
+    // --- 5. CONFIGURACIÓN Y CONEXIÓN REALTIME FIREBASE ---
+    const firebaseConfig = {
+  apiKey: "AIzaSyC5VjFKA8FV2hRVTBXhyueydJZ5SJm6jC0",
+  authDomain: "sanjuan2026-c9c68.firebaseapp.com",
+  projectId: "sanjuan2026-c9c68",
+  storageBucket: "sanjuan2026-c9c68.firebasestorage.app",
+  messagingSenderId: "33154884287",
+  appId: "1:33154884287:web:28e0d6f4f7196622b15c0a",
+  measurementId: "G-3B150PYY6D"
+};
+
+    // Inicialización global
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Variables de UI
+    const formSanJuan = document.getElementById('formSanJuan');
+    const listaRespuestas = document.getElementById('listaRespuestas');
+    const mensajeFormulario = document.getElementById('mensajeFormulario');
+    const respuestasContenedor = document.getElementById('respuestasContenedor');
+    const botonEnviar = document.querySelector('.btn-enviar');
+    let idEdicion = null;
+
+    // Alternar selector de comida/bebida
+    function alternarSelector(id){ 
+        const s = document.getElementById(id); 
+        if(s) s.classList.toggle('abierto'); 
+    }
+    window.alternarSelector = alternarSelector;
+
+    function actualizarResumenOpciones(){
+        const a = Array.from(document.querySelectorAll('input[name="aporte"]:checked')).map(o=>o.value);
+        const ao = document.getElementById('aporteOtro')?.value.trim();
+        const b = document.querySelector('input[name="bebida"]:checked');
+        const bo = document.getElementById('bebidaOtro')?.value.trim();
+        const ra = document.getElementById('resumenAporte');
+        const rb = document.getElementById('resumenBebida');
+        
+        const at = a.map(x => x === 'Otro' ? (ao ? `Otro: ${ao}` : 'Otro') : x);
+        if(ra) ra.textContent = at.length ? `Elegiste: ${at.join(', ')}` : 'Todavía no elegiste comida.';
+        
+        let bt = ''; 
+        if(b) bt = b.value === 'Otro' ? (bo ? `Otro: ${bo}` : 'Otro') : b.value;
+        if(rb) rb.textContent = bt ? `Elegiste: ${bt}` : 'Todavía no elegiste bebida.';
+    }
+
+    // Escuchar eventos para cambiar los resúmenes dinámicamente
+    document.addEventListener('change', actualizarResumenOpciones);
+    document.addEventListener('input', actualizarResumenOpciones);
+
+    // Limpiar formulario
+    function limpiarSeleccionFormulario(){
+        formSanJuan.reset();
+        document.getElementById('personas').value = 1;
+        document.getElementById('selectorAporte')?.classList.remove('abierto');
+        document.getElementById('selectorBebida')?.classList.remove('abierto');
+        idEdicion = null; 
+        if(botonEnviar) botonEnviar.textContent = '🔥 Confirmar asistencia';
+        actualizarResumenOpciones();
+    }
+
+    // Guardar o Editar confirmación
+    if(formSanJuan) {
+        formSanJuan.addEventListener('submit', async e => {
+            e.preventDefault();
+            const aportes = Array.from(document.querySelectorAll('input[name="aporte"]:checked')).map(i=>i.value);
+            const aporteOtro = document.getElementById('aporteOtro')?.value.trim();
+            const bebida = document.querySelector('input[name="bebida"]:checked')?.value;
+            const bebidaOtro = document.getElementById('bebidaOtro')?.value.trim();
+            
+            const confirmado = {
+                nombre: document.getElementById('nombre').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+                personas: parseInt(document.getElementById('personas').value) || 1,
+                aporte: aportes.map(a => a === 'Otro' ? `Otro: ${aporteOtro}` : a).join(', ') || 'Ninguno',
+                bebida: (bebida === 'Otro' ? `Otro: ${bebidaOtro}` : bebida) || 'No especifica',
+                detalle: document.getElementById('detalle').value.trim()
+            };
+
+            if (idEdicion) {
+                // Modo Edición: Actualizar registro existente
+                await db.ref(`confirmaciones/${idEdicion}`).set(confirmado);
+                mensajeFormulario.textContent = '¡Cambios guardados con éxito!';
+            } else {
+                // Modo Nuevo: Insertar nuevo invitado
+                const newRef = db.ref('confirmaciones').push();
+                await newRef.set(confirmado);
+                mensajeFormulario.textContent = '¡Confirmación guardada!';
+            }
+
+            if(mensajeFormulario) {
+                mensajeFormulario.style.display = 'block';
+                setTimeout(() => { mensajeFormulario.style.display = 'none'; }, 4000);
+            }
+
+            limpiarSeleccionFormulario();
+        });
+    }
+
+    // Escuchar y Mostrar confirmaciones en TIEMPO REAL (.on escucha cambios automáticamente)
+    function escucharConfirmacionesFirebase(){
+        db.ref('confirmaciones').on('value', snapshot => {
+            const data = snapshot.val() || {};
+            listaRespuestas.innerHTML = '';
+            
+            const keys = Object.keys(data);
+            if(keys.length === 0) {
+                if(respuestasContenedor) respuestasContenedor.style.display = 'none';
+                return;
+            }
+            
+            if(respuestasContenedor) respuestasContenedor.style.display = 'block';
+
+            keys.forEach(key => {
+                const persona = data[key];
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="confirmado-nombre"><b>${persona.nombre}</b> (${persona.personas} ${persona.personas > 1 ? 'personas' : 'persona'})</span>
+                    <span class="confirmado-dato"><b>🍽️ Lleva:</b> ${persona.aporte}</span>
+                    <span class="confirmado-dato"><b>🥤 Toma:</b> ${persona.bebida}</span>
+                    ${persona.telefono ? `<span class="confirmado-dato"><b>📞 Tel:</b> ${persona.telefono}</span>` : ''}
+                    ${persona.detalle ? `<span class="confirmado-dato"><b>💬 Obs:</b> ${persona.detalle}</span>` : ''}
+                    <div class="acciones-confirmado">
+                        <button type="button" class="btn-editar" onclick="editarConfirmacion('${key}')">✏️ Editar</button>
+                        <button type="button" class="btn-eliminar" onclick="eliminarConfirmacion('${key}')">🗑️ Eliminar</button>
+                    </div>
+                `;
+                listaRespuestas.appendChild(li);
+            });
+        });
+    }
+
+    // Funciones CRUD globales para botones
+    window.editarConfirmacion = function(key){
+        db.ref(`confirmaciones/${key}`).once('value').then(snapshot => {
+            const persona = snapshot.val();
+            if(!persona) return;
+            document.getElementById('nombre').value = persona.nombre;
+            document.getElementById('telefono').value = persona.telefono;
+            document.getElementById('personas').value = persona.personas;
+            document.getElementById('detalle').value = persona.detalle;
+            
+            // Marcar id y cambiar texto del botón principal
+            idEdicion = key; 
+            if(botonEnviar) botonEnviar.textContent = '💾 Guardar cambios';
+            
+            // Hacer scroll suave hacia el formulario
+            document.getElementById('formSanJuan').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    window.eliminarConfirmacion = function(key){
+        if(confirm('¿Querés eliminar esta confirmación?')){
+            db.ref(`confirmaciones/${key}`).remove();
+        }
+    }
+
+    window.borrarTodasLasConfirmaciones = function(){
+        if(confirm('🚨 ¿DE VERDAD QUERÉS BORRAR TODAS LAS RESPUESTAS DEL SISTEMA? 🚨')){
+            db.ref('confirmaciones').remove();
+        }
+    }
+
+    // --- 6. CONTROLADOR DE INICIALIZACIÓN (window.onload) ---
+    window.onload = () => {
+        initPixelArt();
+        bucleGral();
+        mostrarSlides(slideIndex);
+        iniciarAutoplay();
+        
+        actualizarCuentaRegresiva();
+        setInterval(actualizarCuentaRegresiva, 1000);
+
+        escucharConfirmacionesFirebase();
+    };
+</script>
+
+</body>
+</html>
