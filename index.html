@@ -758,7 +758,6 @@
             <div id="respuestasContenedor" class="respuestas-contenedor">
                 <h3>✅ Personas que ya confirmaron asistencia</h3>
                 <p class="aviso-confirmados">Acá se muestran las respuestas guardadas desde esta página.</p>
-                <button type="button" class="btn-borrar-todo" onclick="borrarTodasLasConfirmaciones()">🗑️ Borrar todas las confirmaciones</button>
                 <ul id="listaRespuestas" class="lista-respuestas"></ul>
             </div>
         </div>
@@ -1180,7 +1179,6 @@
                     ${persona.detalle ? `<span class="confirmado-dato"><b>💬 Obs:</b> ${persona.detalle}</span>` : ''}
                     <div class="acciones-confirmado">
                         <button type="button" class="btn-editar" onclick="editarConfirmacion('${key}')">✏️ Editar</button>
-                        <button type="button" class="btn-eliminar" onclick="eliminarConfirmacion('${key}')">🗑️ Eliminar</button>
                     </div>
                 `;
                 listaRespuestas.appendChild(li);
@@ -1206,19 +1204,6 @@
             document.getElementById('formSanJuan').scrollIntoView({ behavior: 'smooth' });
         });
     }
-
-    window.eliminarConfirmacion = function(key){
-        if(confirm('¿Querés eliminar esta confirmación?')){
-            db.ref(`confirmaciones/${key}`).remove();
-        }
-    }
-
-    window.borrarTodasLasConfirmaciones = function(){
-        if(confirm('🚨 ¿DE VERDAD QUERÉS BORRAR TODAS LAS RESPUESTAS DEL SISTEMA? 🚨')){
-            db.ref('confirmaciones').remove();
-        }
-    }
-
     // --- 6. CONTROLADOR DE INICIALIZACIÓN (window.onload) ---
     window.onload = () => {
         initPixelArt();
