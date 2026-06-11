@@ -1116,7 +1116,7 @@
         actualizarResumenOpciones();
     }
 
-    // Guardar o Editar confirmación
+   // Guardar o Editar confirmación
     if(formSanJuan) {
         formSanJuan.addEventListener('submit', async e => {
             e.preventDefault();
@@ -1177,16 +1177,36 @@
                     <span class="confirmado-dato"><b>🥤 Toma:</b> ${persona.bebida}</span>
                     ${persona.telefono ? `<span class="confirmado-dato"><b>📞 Tel:</b> ${persona.telefono}</span>` : ''}
                     ${persona.detalle ? `<span class="confirmado-dato"><b>💬 Obs:</b> ${persona.detalle}</span>` : ''}
-                   
-
+                    <div class="acciones-confirmado">
+                        <button type="button" class="btn-editar" onclick="editarConfirmacion('${key}')">✏️ Editar</button>
+                    </div>
+                `;
                 listaRespuestas.appendChild(li);
             });
         });
     }
 
-  
+    // Funciones CRUD globales para botones
+  window.editarConfirmacion = function(key){
+        db.ref(`confirmaciones/${key}`).once('value').then(snapshot => {
+            const persona = snapshot.val();
+            if(!persona) return;
+            document.getElementById('nombre').value = persona.nombre;
+            document.getElementById('telefono').value = persona.telefono;
+            document.getElementById('personas').value = persona.personas;
+            document.getElementById('detalle').value = persona.detalle;
+            
+            // Marcar id y cambiar texto del botón principal
+            idEdicion = key; 
+            if(botonEnviar) botonEnviar.textContent = '💾 Guardar cambios';
+            
+            // Hacer scroll suave hacia el formulario
+            document.getElementById('formSanJuan').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
     // --- 6. CONTROLADOR DE INICIALIZACIÓN (window.onload) ---
-window.onload = () => {
+    window.onload = () => {
         initPixelArt();
         bucleGral();
         mostrarSlides(slideIndex);
